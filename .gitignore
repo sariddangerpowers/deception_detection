@@ -1,0 +1,37 @@
+# Core Dataset (User asked to ignore)
+data/
+checkpoints/
+
+# Virtual Environment
+.venv/
+venv/
+env/
+
+# Python Cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Logs and Debugging
+*.log
+debug_*.py
+verify_*.py
+test_outputs/
+
+# Analysis and Reports
+*.json
+!pyproject.toml
+!uv.lock
+
+# IDE and System Files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/

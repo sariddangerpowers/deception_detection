@@ -1,0 +1,15 @@
+# Required for model execution
+torch
+torchvision
+torchaudio
+# Required for preprocessing
+librosa
+opencv-python
+transformers
+pandas
+numpy
+scikit-learn
+tqdm
+pillow
+# Required for testing
+pytest
