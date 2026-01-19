@@ -1,6 +1,7 @@
 import os
 import pandas as pd
 from pathlib import Path
+from src.config import PathConfig
 
 def generate_processed_metadata(processed_root, original_annotations):
     """
@@ -35,9 +36,9 @@ def generate_processed_metadata(processed_root, original_annotations):
             rows.append({
                 "sample_id": user_run_id,
                 "usernum": row['usernum'],
-                "video_feat": str(v_path.absolute()),
-                "audio_feat": str(a_path.absolute()),
-                "text_feat": str(t_path.absolute()),
+                "video_feat": (v_path.relative_to(processed_root)).as_posix(),
+                "audio_feat": (a_path.relative_to(processed_root)).as_posix(),
+                "text_feat": (t_path.relative_to(processed_root)).as_posix(),
                 "transcription": transcription,
                 "label": row['truth']
             })
@@ -48,7 +49,8 @@ def generate_processed_metadata(processed_root, original_annotations):
     print(f"Generated metadata for {len(rows)} samples at {output_path}")
 
 if __name__ == "__main__":
+    path_cfg = PathConfig()
     generate_processed_metadata(
-        "c:/Users/saridb/BagOfLies/data/processed",
-        "c:/Users/saridb/BagOfLies/data/BagOfLies/Annotations.csv"
+        path_cfg.processed_dir,
+        path_cfg.annotations_csv
     )

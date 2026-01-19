@@ -9,7 +9,7 @@ import json
 import numpy as np
 from pathlib import Path
 
-from src.config import ModelConfig, TrainingConfig
+from src.config import ModelConfig, TrainingConfig, PathConfig
 from src.models.fusion_model import build_multimodal_model
 from src.preprocessing.loader import get_user_independent_splits, get_cv_loaders, get_final_loaders
 
@@ -127,7 +127,8 @@ def main():
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Using device: {device}")
     
-    META = "c:/Users/saridb/BagOfLies/data/processed/metadata.csv"
+    path_cfg = PathConfig()
+    META = str(path_cfg.metadata_csv)
     
     # 1. Split Users (70/30)
     df, train_val_idx, test_idx = get_user_independent_splits(META)
@@ -179,9 +180,10 @@ def main():
         }
     }
     
-    with open("detailed_training_report.json", "w") as f:
+    report_path = path_cfg.project_root / "detailed_training_report.json"
+    with open(report_path, "w") as f:
         json.dump(report, f, indent=4)
-    print(f"\nDetailed statistics saved to detailed_training_report.json")
+    print(f"\nDetailed statistics saved to {report_path}")
 
 if __name__ == "__main__":
     main()

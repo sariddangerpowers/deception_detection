@@ -5,12 +5,13 @@ import logging
 from pathlib import Path
 from tqdm import tqdm
 
-from src.config import PreprocessingConfig
+from src.config import PreprocessingConfig, PathConfig
 from src.preprocessing.text import TextPreprocessor
 
 # Configure Logging
+path_cfg = PathConfig()
 logging.basicConfig(
-    filename='redo_text.log',
+    filename=str(path_cfg.project_root / 'redo_text.log'),
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s'
 )
@@ -55,10 +56,12 @@ def redo_text_preprocessing(annotations_csv, data_root, output_root):
     print("\nText redo complete. Running aggregator...")
     # Import and run aggregator
     from src.preprocessing.aggregate import generate_processed_metadata
-    generate_processed_metadata(str(output_root), str(annotations_csv))
+    generate_processed_metadata(output_root, annotations_csv)
 
 if __name__ == "__main__":
-    ANNOTATIONS = "c:/Users/saridb/BagOfLies/data/BagOfLies/Annotations.csv"
-    DATA_ROOT = "c:/Users/saridb/BagOfLies/data/BagOfLies"
-    OUTPUT_ROOT = "c:/Users/saridb/BagOfLies/data/processed"
-    redo_text_preprocessing(ANNOTATIONS, DATA_ROOT, OUTPUT_ROOT)
+    path_cfg = PathConfig()
+    redo_text_preprocessing(
+        path_cfg.annotations_csv, 
+        path_cfg.bag_of_lies_dir, 
+        path_cfg.processed_dir
+    )

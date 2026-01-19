@@ -4,6 +4,7 @@ import numpy as np
 from torch.utils.data import Dataset, DataLoader, Subset
 from pathlib import Path
 from sklearn.model_selection import GroupShuffleSplit, GroupKFold
+from src.config import PathConfig
 
 class PreprocessedBagOfLiesDataset(Dataset):
     """
@@ -11,6 +12,7 @@ class PreprocessedBagOfLiesDataset(Dataset):
     """
     def __init__(self, metadata_csv):
         self.df = pd.read_csv(metadata_csv)
+        self.processed_root = Path(metadata_csv).parent
         
     def __len__(self):
         return len(self.df)
@@ -18,10 +20,10 @@ class PreprocessedBagOfLiesDataset(Dataset):
     def __getitem__(self, idx):
         row = self.df.iloc[idx]
         
-        # Load tensors
-        video_feat = torch.load(row['video_feat']) # Shape: (batch, 128) -> actually saved as (128)
-        audio_feat = torch.load(row['audio_feat']) # Shape: (1, 128) -> GAP should have reduced it
-        text_feat = torch.load(row['text_feat'])   # Shape: (1, seq, 768)
+        # Load tensors (resolve relative paths stored in CSV)
+        video_feat = torch.load(self.processed_root / row['video_feat']) 
+        audio_feat = torch.load(self.processed_root / row['audio_feat']) 
+        text_feat = torch.load(self.processed_root / row['text_feat'])   
         
         # Squeeze batch dimensions if they exist from saving
         if video_feat.dim() == 2: video_feat = video_feat.squeeze(0)
@@ -148,7 +150,8 @@ def get_final_loaders(metadata_csv, train_val_idx, test_idx, batch_size=32):
     return train_loader, test_loader
 
 if __name__ == "__main__":
-    META = "c:/Users/saridb/BagOfLies/data/processed/metadata.csv"
+    path_cfg = PathConfig()
+    META = str(path_cfg.metadata_csv)
     if Path(META).exists():
         df, train_val_idx, test_idx = get_user_independent_splits(META)
         

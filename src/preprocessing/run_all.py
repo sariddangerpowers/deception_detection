@@ -6,14 +6,15 @@ import traceback
 from tqdm import tqdm
 from pathlib import Path
 
-from src.config import PreprocessingConfig
+from src.config import PreprocessingConfig, PathConfig
 from src.preprocessing.video import extract_video_features
 from src.preprocessing.audio import extract_audio_features
 from src.preprocessing.text import TextPreprocessor
 
 # Configure Logging
+path_cfg = PathConfig()
 logging.basicConfig(
-    filename='preprocessing.log',
+    filename=str(path_cfg.project_root / 'preprocessing.log'),
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s'
 )
@@ -109,8 +110,10 @@ def run_batch_preprocessing(annotations_csv, data_root, output_root):
     print(f"Report saved to {output_root / 'preprocessing_report.txt'}")
 
 if __name__ == "__main__":
-    ANNOTATIONS = "c:/Users/saridb/BagOfLies/data/BagOfLies/Annotations.csv"
-    DATA_ROOT = "c:/Users/saridb/BagOfLies/data/BagOfLies"
-    OUTPUT_ROOT = "c:/Users/saridb/BagOfLies/data/processed"
+    path_cfg = PathConfig()
     
-    run_batch_preprocessing(ANNOTATIONS, DATA_ROOT, OUTPUT_ROOT)
+    run_batch_preprocessing(
+        path_cfg.annotations_csv, 
+        path_cfg.bag_of_lies_dir, 
+        path_cfg.processed_dir
+    )

@@ -1,5 +1,32 @@
 from dataclasses import dataclass, field
 from typing import Tuple, List
+from pathlib import Path
+import os
+
+@dataclass
+class PathConfig:
+    # Project Root: Default to the parent of the 'src' directory
+    project_root: Path = Path(__file__).resolve().parent.parent
+    
+    # Data Directories (Relative to project root by default)
+    data_root: Path = project_root / "data"
+    bag_of_lies_dir: Path = data_root / "BagOfLies"
+    processed_dir: Path = data_root / "processed"
+    
+    # Files
+    annotations_csv: Path = bag_of_lies_dir / "Annotations.csv"
+    metadata_csv: Path = processed_dir / "metadata.csv"
+    
+    def __post_init__(self):
+        # Allow environment variable overrides for Colab/Server usage
+        if "PROJECT_ROOT" in os.environ:
+            self.project_root = Path(os.environ["PROJECT_ROOT"])
+        if "DATA_ROOT" in os.environ:
+            self.data_root = Path(os.environ["DATA_ROOT"])
+            self.bag_of_lies_dir = self.data_root / "BagOfLies"
+            self.processed_dir = self.data_root / "processed"
+            self.annotations_csv = self.bag_of_lies_dir / "Annotations.csv"
+            self.metadata_csv = self.processed_dir / "metadata.csv"
 
 @dataclass
 class PreprocessingConfig:

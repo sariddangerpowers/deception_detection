@@ -2,7 +2,7 @@ import os
 import pandas as pd
 from pathlib import Path
 from tqdm import tqdm
-from src.config import PreprocessingConfig
+from src.config import PreprocessingConfig, PathConfig
 from src.preprocessing.text import TextPreprocessor
 
 def extract_all_transcripts(annotations_csv, data_root, output_root):
@@ -41,7 +41,9 @@ def extract_all_transcripts(annotations_csv, data_root, output_root):
                 print(f"\nFailed {user_run_id}: {e}")
 
 if __name__ == "__main__":
-    ANNOTATIONS = "c:/Users/saridb/BagOfLies/data/BagOfLies/Annotations.csv"
-    DATA_ROOT = "c:/Users/saridb/BagOfLies/data/BagOfLies"
-    OUTPUT_ROOT = "c:/Users/saridb/BagOfLies/data/processed"
-    extract_all_transcripts(ANNOTATIONS, DATA_ROOT, OUTPUT_ROOT)
+    path_cfg = PathConfig()
+    extract_all_transcripts(
+        path_cfg.annotations_csv, 
+        path_cfg.bag_of_lies_dir, 
+        path_cfg.processed_dir
+    )

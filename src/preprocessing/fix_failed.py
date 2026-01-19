@@ -5,12 +5,13 @@ import logging
 from pathlib import Path
 from tqdm import tqdm
 
-from src.config import PreprocessingConfig
+from src.config import PreprocessingConfig, PathConfig
 from src.preprocessing.text import TextPreprocessor
 
 # Configure Logging
+path_cfg = PathConfig()
 logging.basicConfig(
-    filename='fix_failed.log',
+    filename=str(path_cfg.project_root / 'fix_failed.log'),
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s'
 )
@@ -59,8 +60,9 @@ def fix_failed_samples(annotations_csv, data_root, output_root):
     print(f"\nFixing Complete! Newly success: {success_count}, Still failed: {failed_count}")
 
 if __name__ == "__main__":
-    ANNOTATIONS = "c:/Users/saridb/BagOfLies/data/BagOfLies/Annotations.csv"
-    DATA_ROOT = "c:/Users/saridb/BagOfLies/data/BagOfLies"
-    OUTPUT_ROOT = "c:/Users/saridb/BagOfLies/data/processed"
-    
-    fix_failed_samples(ANNOTATIONS, DATA_ROOT, OUTPUT_ROOT)
+    path_cfg = PathConfig()
+    fix_failed_samples(
+        path_cfg.annotations_csv, 
+        path_cfg.bag_of_lies_dir, 
+        path_cfg.processed_dir
+    )
