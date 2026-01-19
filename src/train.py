@@ -147,16 +147,53 @@ def main():
     
     # 3. Final Retrain on full Train+Val and test on held-out Test
     print("\n--- Performing Final Retrain and Test ---")
-    final_train_loader, test_loader = get_final_loaders(META, train_val_idx, test_idx, batch_size=train_cfg.batch_size)
     
-    final_best_acc, final_history = run_training(final_train_loader, test_loader, model_cfg, train_cfg, device, fold_name="final")
+    # To avoid test-set leakage, we split the train_val pool once more
+    # so we have an 'inner validation' set for early stopping during the final pass.
+    from sklearn.model_selection import GroupShuffleSplit
+    gss_final = GroupShuffleSplit(n_splits=1, test_size=0.1, random_state=42)
+    final_train_idx, final_val_idx = next(gss_final.split(train_val_idx, groups=df.iloc[train_val_idx]['usernum']))
+    
+    # Map back to original indices
+    real_final_train_idx = train_val_idx[final_train_idx]
+    real_final_val_idx = train_val_idx[final_val_idx]
+    
+    from src.preprocessing.loader import PreprocessedBagOfLiesDataset, multimodal_collate, Subset
+    dataset = PreprocessedBagOfLiesDataset(META)
+    
+    final_train_loader = DataLoader(
+        Subset(dataset, real_final_train_idx),
+        batch_size=train_cfg.batch_size,
+        shuffle=True,
+        collate_fn=multimodal_collate,
+        num_workers=4,
+        pin_memory=True
+    )
+    final_val_loader = DataLoader(
+        Subset(dataset, real_final_val_idx),
+        batch_size=train_cfg.batch_size,
+        shuffle=False,
+        collate_fn=multimodal_collate,
+        num_workers=4,
+        pin_memory=True
+    )
+    test_loader = DataLoader(
+        Subset(dataset, test_idx),
+        batch_size=train_cfg.batch_size,
+        shuffle=False,
+        collate_fn=multimodal_collate,
+        num_workers=4,
+        pin_memory=True
+    )
+
+    final_best_acc, final_history = run_training(final_train_loader, final_val_loader, model_cfg, train_cfg, device, fold_name="final")
     
     # Load best and evaluate on test set
     best_model = build_multimodal_model(model_cfg).to(device)
-    best_model.load_state_dict(torch.load("checkpoints/best_model_final.pt"))
+    best_model.load_state_dict(torch.load("checkpoints/best_model_final.pt", map_location=device))
     test_loss, test_acc = evaluate(best_model, test_loader, nn.CrossEntropyLoss(), device)
     
-    print(f"\nFinal Test Results:")
+    print(f"\nFinal Test Results (Strictly Unseen):")
     print(f"Accuracy: {test_acc:.4f}")
     print(f"Loss: {test_loss:.4f}")
     
